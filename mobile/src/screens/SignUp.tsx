@@ -1,13 +1,17 @@
 import { useNavigation } from "@react-navigation/native";
-import { Center, Heading, Image, ScrollView, Text, VStack } from "native-base";
+import { Center, Heading, Image, ScrollView, Text, useToast, VStack } from "native-base";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { api } from "@services/api";
 
 import LogoSvg from '@assets/logo.svg'
 import BackgroundImg from '@assets/background.png'
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
+
+import { AppError } from "@utils/AppError";
+
 
 type FormDataProps = {
   name: string
@@ -24,7 +28,8 @@ const signUpSchema = yup.object({
 })
 
 export function SignUp() {
-  const navigation = useNavigation()
+  const toast = useToast();
+  const navigation = useNavigation();
   const { control, handleSubmit, reset, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(signUpSchema)
   });
@@ -34,20 +39,25 @@ export function SignUp() {
   }
 
   async function handleSignUp({ name, email, password}: FormDataProps) {
-    const response = await fetch('http://172.21.0.1:3333/users', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({name, email, password})
-    })
-    
-    const data = await response.json()
-    console.log(data)
 
-    reset();
-    navigation.goBack();
+    try {
+      const response = await api.post('users', { name, email, password });
+      console.log(response.data)
+  
+      reset();
+      navigation.goBack();
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError ? error.message : 'Não foi possivel criar a conta. Tente novamente mais tarde.'
+
+      if(isAppError) {
+        toast.show({
+          title,
+          placement: 'top',
+          bgColor: 'red.500'
+        })
+      }
+    }
   }
 
 
