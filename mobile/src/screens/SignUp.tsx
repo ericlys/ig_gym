@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { Center, Heading, Image, ScrollView, Text, useToast, VStack } from "native-base";
 import { useForm, Controller } from "react-hook-form";
@@ -11,6 +12,7 @@ import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 
 import { AppError } from "@utils/AppError";
+import { useAuth } from "@hooks/useAuth";
 
 
 type FormDataProps = {
@@ -28,9 +30,14 @@ const signUpSchema = yup.object({
 })
 
 export function SignUp() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const toast = useToast();
+  const { signIn } = useAuth()
+
   const navigation = useNavigation();
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormDataProps>({
+
+  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(signUpSchema)
   });
 
@@ -41,12 +48,14 @@ export function SignUp() {
   async function handleSignUp({ name, email, password}: FormDataProps) {
 
     try {
-      const response = await api.post('users', { name, email, password });
-      console.log(response.data)
-  
-      reset();
-      navigation.goBack();
+      setIsLoading(true);
+
+      await api.post('users', { name, email, password });
+      await signIn(email, password);
+
     } catch (error) {
+      setIsLoading(false);
+      
       const isAppError = error instanceof AppError;
       const title = isAppError ? error.message : 'Não foi possivel criar a conta. Tente novamente mais tarde.'
 
@@ -143,7 +152,10 @@ export function SignUp() {
             )}
           />
 
-          <Button onPress={handleSubmit(handleSignUp)} title="Criar e acessar"/>
+          <Button 
+            isLoading={isLoading}
+            onPress={handleSubmit(handleSignUp)} 
+            title="Criar e acessar"/>
         </Center>
 
   
