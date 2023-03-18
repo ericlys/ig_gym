@@ -24,7 +24,7 @@ class UserRefreshToken {
     const refreshTokenExpired = dayjs().isAfter(dayjs.unix(refreshToken.expires_in));
 
     if (refreshTokenExpired) {
-      await knex("refresh_token").where({ user_id: refreshToken.user_id }).delete();
+      await knex("refresh_tokens").where({ user_id: refreshToken.user_id }).delete();
 
       const generateRefreshToken = new GenerateRefreshToken();
       const newRefreshToken = await generateRefreshToken.execute(refreshToken.user_id);
