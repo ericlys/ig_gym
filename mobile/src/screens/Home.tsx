@@ -47,6 +47,10 @@ export function Home() {
   }
 
   async function fetchExercisesByGroup() {
+    if(!groupSelected){
+      return
+    }
+    
     try {
       setIsLoading(true);
       const response = await api.get(`/exercises/bygroup/${groupSelected}`);
