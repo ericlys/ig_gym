@@ -66,7 +66,6 @@ export function Profile() {
 
   const toast = useToast();
   const { user, updateUserProfile } = useAuth();
-  console.log(user.avatar)
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(profileSchema), 

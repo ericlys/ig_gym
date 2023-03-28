@@ -19,15 +19,17 @@ class UserAvatarController {
     }
 
     if (user.avatar) {
-      // await diskStorage.deleteFile(user.avatar);
       await client.deleteFile(user.avatar, "avatar");
     }
 
     const filename = await client.saveFile(avatarFilename, "avatar");
+
+    user.avatar = filename;
     
     await knex("users").where({ id: user_id }).update(user);
     
     user.avatar = process.env.DISK === 'local' ? `${process.env.APP_API_URL}/avatar/${filename}` : `${process.env.AWS_BUCKET_URL}/avatar/${filename}`;
+    
     return response.json(user);
   }
 }
