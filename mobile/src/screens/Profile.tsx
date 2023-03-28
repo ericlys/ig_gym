@@ -66,6 +66,7 @@ export function Profile() {
 
   const toast = useToast();
   const { user, updateUserProfile } = useAuth();
+  console.log(user.avatar)
 
   const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(profileSchema), 
@@ -184,7 +185,7 @@ export function Profile() {
             <UserPhoto 
               source={ 
                 user.avatar
-                 ? {uri: `${api.defaults.baseURL}/avatar/${user.avatar}`}
+                 ? {uri: user.avatar}
                  : defaultUserPhotoImg} 
               alt="Foto do usuário"
               size={PHOTO_SIZE} 

@@ -16,7 +16,7 @@ export function HomeHeader(){
       <UserPhoto 
         source={ 
           user.avatar
-           ? {uri: `${api.defaults.baseURL}/avatar/${user.avatar}`}
+           ? {uri: user.avatar}
            : defaultUserPhotoImg} 
         alt="Imagem do usuário"
         size={16} 

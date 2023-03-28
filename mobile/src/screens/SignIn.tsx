@@ -40,7 +40,7 @@ export function SignIn() {
       await signIn(email, password);
     } catch (err) {
       const isAppError = err instanceof AppError;
-      const title = isAppError ? err.message : 'Não foi possivel entrar. Tente novamente mais tarde.';
+      const title = isAppError ? err.message : 'Não foi possível entrar. Tente novamente mais tarde.';
       
       setIsLoading(false)
       

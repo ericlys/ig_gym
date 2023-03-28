@@ -24,11 +24,10 @@ class UserAvatarController {
     }
 
     const filename = await client.saveFile(avatarFilename, "avatar");
-    user.avatar = filename;
     
     await knex("users").where({ id: user_id }).update(user);
     
-    user.avatar_url = process.env.DISK === 'local' ? `${process.env.APP_API_URL}/avatar/${filename}` : `${process.env.AWS_BUCKET_URL}/avatar/${filename}`;
+    user.avatar = process.env.DISK === 'local' ? `${process.env.APP_API_URL}/avatar/${filename}` : `${process.env.AWS_BUCKET_URL}/avatar/${filename}`;
     return response.json(user);
   }
 }

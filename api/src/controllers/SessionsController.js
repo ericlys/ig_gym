@@ -28,6 +28,10 @@ class SessionsController {
 
     delete user.password;
 
+    const img_url = process.env.DISK === 'local' ? `${process.env.APP_API_URL}/avatar/${user.avatar}` : `${process.env.AWS_BUCKET_URL}/avatar/${user.avatar}`;
+
+    user.avatar = img_url;
+
     response.status(201).json({ user, token, refresh_token });
   }
 }
