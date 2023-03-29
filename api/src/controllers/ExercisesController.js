@@ -1,4 +1,5 @@
 const knex = require("../database");
+const AppError = require("../utils/AppError");
 
 class ExercisesController {
 
