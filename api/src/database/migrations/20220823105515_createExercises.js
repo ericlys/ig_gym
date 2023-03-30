@@ -1,5 +1,5 @@
 exports.up = knex => knex.schema.createTable("exercises", table => {
-  table.increments("id");
+  table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
   table.text("name").notNullable();
   table.integer("series").notNullable();
   table.integer("repetitions").notNullable();
