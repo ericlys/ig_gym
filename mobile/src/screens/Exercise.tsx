@@ -121,7 +121,7 @@ export function Exercise() {
             <Image
               w="full"
               h={80}
-              source={{uri: `${api.defaults.baseURL}/exercise/demo/${exercise.demo}`}}
+              source={{uri: exercise.demo}}
               alt="Nome do exercício"
               resizeMode="cover"
               rounded="lg"

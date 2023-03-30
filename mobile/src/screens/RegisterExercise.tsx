@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { Center, Heading, Image, ScrollView, Skeleton, Text, useToast, VStack } from "native-base";
+import { Center, Image, ScrollView, Skeleton, Text, useToast, VStack } from "native-base";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import defaultUserPhotoImg from "@assets/userPhotoDefault.png";
+import defaultUserPhotoImg from "@assets/addImg.png";
 
 import { Controller, useForm } from "react-hook-form";
-import { useAuth } from "@hooks/useAuth";
 import { api } from "@services/api";
 import { AppError } from "@utils/AppError";
 
@@ -17,6 +16,8 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { Input } from "@components/Input";
 import { Button } from "@components/Button";
 import { Select } from "@components/Select";
+import { useNavigation } from "@react-navigation/native";
+import { AppNavigatorRoutesProps } from "@routes/app.routes";
 
 const THUMB_SIZE = 20;
 const DEMO_SIZE = 80;
@@ -31,38 +32,29 @@ type FormDataProps = {
   series: number;
   repetitions: number;
   group: string;
+  demo: string;
+  thumb: string;
 }
 
 const profileSchema = yup.object({
   name: yup
     .string()
-    .required('Informe o nome'),
-  password: yup
+    .required('Informe o nome do exercício'),
+  series: yup
+    .number()
+    .required('Informe a quantidade de series'),
+  repetitions: yup
+    .number()
+    .required('Informe a quantidade de repetições'),
+  group: yup
     .string()
-    .min(6, 'A senha deve ter pelo menos 6 dígitos.')
-    .nullable()
-    .transform((value) => !!value ? value : null),
-  confirm_password: yup
+    .required('Informe o grupo'),
+  thumb: yup
     .string()
-    .nullable()
-    .transform((value) => !!value ? value : null)
-    .oneOf([yup.ref('password')], 'A confirmação de senha não confere.')
-    .when('password', {
-      is: (Field: any) => Field,
-      then: (schema) => schema
-        .nullable()
-        .required('Informe a confirmação da senha.')
-        .transform((value) => !!value ? value : null),
-    }),
-  old_password: yup
+    .required('Adicione uma thumb'),
+  demo: yup
     .string()
-    .when('password', {
-      is: (Field: any) => Field,
-      then: (schema) => schema
-        .nullable()
-        .required('É necessário informar a senha antiga para alterar a senha atual.')
-        .transform((value) => !!value ? value : null),
-    }),
+    .required('Adicione uma demo'),
 })
 
 export function RegisterExercise() {
@@ -70,17 +62,19 @@ export function RegisterExercise() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [thumbIsLoading, setThumbIsLoading] = useState(false);
   const [demoIsLoading, setDemoIsLoading] = useState(false);
+  const navigation = useNavigation<AppNavigatorRoutesProps>();
 
   const toast = useToast();
-  const { user } = useAuth();
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormDataProps>({
+  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(profileSchema)
   });
 
+  const demoUrl = watch('demo');
+  const thumbUrl = watch('thumb');
+
   async function fetchGroups() {
     try {
-      // setIsLoading(true);
       const response = await api.get('/groups');
       const groups = response.data.map((group: string) => ({ label: group, value: group}))
       setGroupsFormatted(groups);
@@ -95,102 +89,159 @@ export function RegisterExercise() {
         bgColor: 'red.500'
       })
     } 
-    // finally {
-    //   setIsLoading(false);
-    // }
   }
 
-  async function handleUserPhotoSelect(){
-    // setPhotoIsLoading(true);
+  async function handleDemoSelect(){
+    setDemoIsLoading(true);
 
-    // try {
-    //   const photoSelected = await ImagePicker.launchImageLibraryAsync({
-    //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //     quality: 1,
-    //     aspect: [4,4],
-    //     allowsEditing: true,
-    //     // base64: true
-    //   })
+    try {
+      const demoSelected = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+        aspect: [4,4],
+      })
       
-    //   if(photoSelected.canceled) {
-    //     return
-    //   }
+      if(demoSelected.canceled) {
+        return
+      }
 
-    //   if(photoSelected.assets[0].uri) {
-    //     const photoInfo = await FileSystem.getInfoAsync(photoSelected.assets[0].uri)
+      if(demoSelected.assets[0].uri) {
+        const photoInfo = await FileSystem.getInfoAsync(demoSelected.assets[0].uri)
+        if(photoInfo.exists && (photoInfo.size / 1024 / 1024) > 8){
+          return toast.show({
+            title: "Essa imagem é muito grande. Escolha uma de até 8MB.",
+            placement: 'top',
+            bgColor: 'red.500'
+          })          
+        }
         
-    //     if(photoInfo.exists && (photoInfo.size / 1024 / 1024) > 5){
-    //       return toast.show({
-    //         title: "Essa imagem é muito grande. Escolha uma de até 5MB.",
-    //         placement: 'top',
-    //         bgColor: 'red.500'
-    //       })          
-    //     }
-        
-    //     const fileExtension = photoSelected.assets[0].uri.split('.').pop();
+        const fileExtension = demoSelected.assets[0].uri.split('.').pop();
+        const filenameFormatted = demoSelected.assets[0].uri;
 
-    //     const photoFile = {
-    //       name: `${user.name}.${fileExtension}`.toLowerCase().replace(/\s/g,''),
-    //       uri: photoSelected.assets[0].uri,
-    //       type: `${photoSelected.assets[0].type}/${fileExtension}`
-    //     } as any;
+        const demoFile = {
+          name: filenameFormatted.toLowerCase().replace(/\s/g,''),
+          uri: demoSelected.assets[0].uri,
+          type: `${demoSelected.assets[0].type}/${fileExtension}`
+        } as any;
 
-    //     const userPhotoUploadForm = new FormData();
-    //     userPhotoUploadForm.append('avatar', photoFile);
+        const demoUploadForm = new FormData();
+        demoUploadForm.append('demo', demoFile);
 
-    //     const avatarUpdatedResponse = await api.patch('/users/avatar', userPhotoUploadForm, {
-    //       headers: {
-    //         'Content-Type': 'multipart/form-data'
-    //       }
-    //     });
+        const demoUploadResponse = await api.post('/exercises/demo', demoUploadForm, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
 
-    //     const userUpdated = user;
-    //     userUpdated.avatar = avatarUpdatedResponse.data.avatar;
-    //     updateUserProfile(userUpdated);
+        setValue('demo', demoUploadResponse.data.img_url);
 
-    //     toast.show({
-    //       title: 'Foto atualizada!',
-    //       placement: 'top',
-    //       bgColor: 'green.500'
-    //     })
-    //   }
+        toast.show({
+          title: 'Demo adicionada',
+          placement: 'top',
+          bgColor: 'green.500'
+        })
+      }
       
-    // } catch (error) {
-    //   console.log(error)
-    // } finally {
-    //   setPhotoIsLoading(false)
-    // }
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setDemoIsLoading(false)
+    }
+  }
+
+  async function handleThumbSelect(){
+    setThumbIsLoading(true);
+
+    try {
+      const thumbSelected = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.1,
+        aspect: [4,4],
+        allowsEditing: true,
+      })
+      
+      if(thumbSelected.canceled) {
+        return
+      }
+
+      if(thumbSelected.assets[0].uri) {
+        const photoInfo = await FileSystem.getInfoAsync(thumbSelected.assets[0].uri)
+        if(photoInfo.exists && (photoInfo.size / 1024 / 1024) > 1){
+          return toast.show({
+            title: "Essa imagem é muito grande. Escolha uma de até 1MB.",
+            placement: 'top',
+            bgColor: 'red.500'
+          })          
+        }
+        
+        const fileExtension = thumbSelected.assets[0].uri.split('.').pop();
+        const filenameFormatted = thumbSelected.assets[0].uri;
+
+        const thumbFile = {
+          name: filenameFormatted.toLowerCase().replace(/\s/g,''),
+          uri: thumbSelected.assets[0].uri,
+          type: `${thumbSelected.assets[0].type}/${fileExtension}`
+        } as any;
+
+        const thumbUploadForm = new FormData();
+        thumbUploadForm.append('thumb', thumbFile);
+
+        const thumbUploadResponse = await api.post('/exercises/thumb', thumbUploadForm, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        setValue('thumb', thumbUploadResponse.data.img_url);
+
+        toast.show({
+          title: 'Thumb adicionada',
+          placement: 'top',
+          bgColor: 'green.500'
+        })
+      }
+      
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setThumbIsLoading(false)
+    }
   }
 
   async function handleRegisterExercise(data: FormDataProps) {
     console.log(data)
-    // try {
-    //   setUpdating(true);
+    try {
+      setIsRegistering(true);
 
-    //   const userUpdated = user;
-    //   userUpdated.name = data.name;
+      await api.post('/exercises', {
+        name: data.name,
+        series: data.series,
+        repetitions: data.repetitions,
+        group: data.group,
+        demo: demoUrl,
+        thumb: thumbUrl
+      });
 
-    //   await api.put('/users', data);
+      toast.show({
+        title: 'Exercício registrado com sucesso!',
+        placement: 'top',
+        bgColor: 'green.500'
+      })
 
-    //   await updateUserProfile(userUpdated);
+      navigation.navigate('home');
 
-    //   toast.show({
-    //     title: 'Perfil atualizado com sucesso!',
-    //     placement: 'top',
-    //     bgColor: 'green.500'
-    //   })
-    // } catch (error) {
-    //   const isAppError = error instanceof AppError;
-    //   const title = isAppError ? error.message : 'Não foi possível atualizar os dados. Tente novamente mais tarde.'
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError ? error.message : 'Não foi possível registrar o exercício. Tente novamente mais tarde.'
 
-    //   toast.show({
-    //     title,
-    //     placement: 'top',
-    //     bgColor: 'red.500'
-    //   })
-    // } finally {
-    //   setUpdating(false);
-    // }
+      toast.show({
+        title,
+        placement: 'top',
+        bgColor: 'red.500'
+      })
+    } finally {
+      setIsRegistering(false);
+    }
   }
 
   useEffect(() => {
@@ -212,19 +263,21 @@ export function RegisterExercise() {
           >
             <Image 
              source={ 
-              user.avatar
-               ? {uri: user.avatar}
+              demoUrl
+               ? {uri: demoUrl}
                : defaultUserPhotoImg} 
-               alt="Demo do exercício"
-               w={DEMO_SIZE}
-               h={DEMO_SIZE} 
+              alt="Demo do exercício"
+              w={DEMO_SIZE}
+              h={DEMO_SIZE} 
+              borderWidth="1"
+              borderColor={errors.demo ? "red.500" : "gray.400"}
               rounded="md"
               mr={4}
-              resizeMode="center"
+              resizeMode="contain"
             />
           </Skeleton>
          
-         <TouchableOpacity onPress={handleUserPhotoSelect}>
+         <TouchableOpacity onPress={handleDemoSelect}>
           <Text color="green.500" fontWeight="bold" fontSize="md" mt={2} mb={8}>
             Adicionar Demonstração (gif)
           </Text>
@@ -239,16 +292,19 @@ export function RegisterExercise() {
           >
             <Image 
               source={ 
-                user.avatar
-                 ? {uri: user.avatar}
+                thumbUrl
+                 ? {uri: thumbUrl}
                  : defaultUserPhotoImg} 
               alt="Thumbnail do exercício"
+              borderWidth="1"
+              borderColor={errors.demo ? "red.500" : "gray.400"}
               size={THUMB_SIZE} 
               rounded="sm"
+              resizeMode="contain"
            />
           </Skeleton>
          
-         <TouchableOpacity onPress={handleUserPhotoSelect}>
+         <TouchableOpacity onPress={handleThumbSelect}>
           <Text color="green.500" fontWeight="bold" fontSize="md" mt={2} mb={8}>
             Adicionar thumbnail
           </Text>
@@ -277,6 +333,7 @@ export function RegisterExercise() {
                 bg="gray.600"
                 onChangeText={onChange}
                 keyboardType={"decimal-pad"}
+                errorMessage={errors.series?.message}
               />
             )}
           />
@@ -290,6 +347,7 @@ export function RegisterExercise() {
                 bg="gray.600"
                 onChangeText={onChange}
                 keyboardType={"decimal-pad"}
+                errorMessage={errors.repetitions?.message}
               />
             )}
           />
@@ -303,6 +361,7 @@ export function RegisterExercise() {
                 accessibilityLabel="Selecione um grupo"
                 items={groupsFormatted}
                 onValueChange={onChange}
+                errorMessage={errors.group?.message}
             />
             )}
           />

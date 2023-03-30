@@ -19,9 +19,9 @@ class ExercisesImageController {
       throw new AppError("Somente usuários autenticados podem salvar imagens", 401);
     }
 
-    const filename = await client.saveFile(avatarFilename, "exercises/gif");
+    const filename = await client.saveFile(avatarFilename, "exercise/demo");
     
-    const img_url = process.env.DISK === 'local' ? `${process.env.APP_API_URL}/exercises/gif/${filename}` : `${process.env.AWS_BUCKET_URL}/exercises/gif/${filename}`;
+    const img_url = process.env.DISK === 'local' ? `${process.env.APP_API_URL}/exercise/demo/${filename}` : `${process.env.AWS_BUCKET_URL}/exercise/demo/${filename}`;
     
     return response.json({ filename, img_url });
   }

@@ -13,11 +13,11 @@ const app = express();
 
 app.use("/avatar", express.static(uploadConfig.UPLOADS_FOLDER));
 
-const demoExercisePath = path.resolve(__dirname, "..", "exercises", "gif")
-app.use("/exercise/demo", express.static(demoExercisePath));
+// const demoExercisePath = path.resolve(__dirname, "..", "exercises", "gif")
+app.use("/exercise/demo", express.static(uploadConfig.UPLOADS_FOLDER));
 
-const thumbExercisesPath = path.resolve(__dirname, "..", "exercises", "thumb")
-app.use("/exercise/thumb", express.static(thumbExercisesPath));
+// const thumbExercisesPath = path.resolve(__dirname, "..", "exercises", "thumb")
+app.use("/exercise/thumb", express.static(uploadConfig.UPLOADS_FOLDER));
 
 
 const routes = require("./routes");

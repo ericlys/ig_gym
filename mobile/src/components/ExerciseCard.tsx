@@ -17,7 +17,7 @@ export function ExerciseCard({data, ...rest}: Props) {
     <TouchableOpacity {...rest}>
       <HStack bg="gray.500" alignItems="center" p={2} pr={4} rounded="md" mb={3}>
         <Image 
-          source={{uri: `${api.defaults.baseURL}/exercise/thumb/${data.thumb}`}}
+          source={{uri: data.thumb}}
           alt="Imagem do exercício"
           w={16}
           h={16}
