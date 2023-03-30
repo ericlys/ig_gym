@@ -2,6 +2,7 @@ const { Router } = require("express");
 const multer = require("multer");
 const uploadConfig = require("../configs/upload");
 const ensureAuthenticated = require("../middlewares/ensureAuthenticated");
+const { can } = require("../middlewares/permissions");
 
 const ExercisesController = require("../controllers/ExercisesController");
 const ExercisesThumbController = require("../controllers/ExercisesThumbController");
@@ -15,7 +16,13 @@ const exercisesImageController = new ExercisesImageController();
 
 const upload = multer(uploadConfig.MULTER);
 
-exercisesRoutes.post("/", exercisesController.create);
+exercisesRoutes.post(
+  "/", 
+  ensureAuthenticated,
+  can(["create_exercise"]),
+  exercisesController.create
+);
+
 exercisesRoutes.get("/bygroup/:group", exercisesController.index);
 exercisesRoutes.get("/:id", exercisesController.show);
 exercisesRoutes.post("/demo", ensureAuthenticated, upload.single("demo"), exercisesImageController.save);
