@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { Center, Image, ScrollView, Skeleton, Text, useToast, VStack } from "native-base";
+import { Center, Image, Modal, ScrollView, Skeleton, Text, useToast, VStack } from "native-base";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from 'expo-file-system';
 import * as yup from 'yup';
@@ -58,7 +58,9 @@ const profileSchema = yup.object({
 })
 
 export function RegisterExercise() {
-  const [groupsFormatted, setGroupsFormatted] = useState<GroupsFormattedProps[]>([])
+  const [showModal, setShowModal] = useState(false);
+  const [newGroup, setNewGroup] = useState('');
+  const [groupsFormatted, setGroupsFormatted] = useState<GroupsFormattedProps[]>([]);
   const [isRegistering, setIsRegistering] = useState(false);
   const [thumbIsLoading, setThumbIsLoading] = useState(false);
   const [demoIsLoading, setDemoIsLoading] = useState(false);
@@ -66,7 +68,7 @@ export function RegisterExercise() {
 
   const toast = useToast();
 
-  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormDataProps>({
+  const { control, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<FormDataProps>({
     resolver: yupResolver(profileSchema)
   });
 
@@ -209,7 +211,6 @@ export function RegisterExercise() {
   }
 
   async function handleRegisterExercise(data: FormDataProps) {
-    console.log(data)
     try {
       setIsRegistering(true);
 
@@ -228,6 +229,7 @@ export function RegisterExercise() {
         bgColor: 'green.500'
       })
 
+      reset();
       navigation.navigate('home');
 
     } catch (error) {
@@ -242,6 +244,23 @@ export function RegisterExercise() {
     } finally {
       setIsRegistering(false);
     }
+  }
+
+  function handleAddNewGroup() {
+    setNewGroup('')
+    setShowModal(false)
+    const newGroupFormatted = newGroup.replace(/\s/g, '');
+    const checkIfGroupAlreadyExists = groupsFormatted.find(group => group.label.toLowerCase() === newGroupFormatted.toLowerCase())
+
+    if(!!checkIfGroupAlreadyExists){
+      setValue("group", checkIfGroupAlreadyExists.value)
+      return
+    }
+
+    const group = {label: newGroupFormatted, value: newGroupFormatted}
+    setGroupsFormatted([group, ...groupsFormatted])
+
+    setValue("group", newGroupFormatted)
   }
 
   useEffect(() => {
@@ -355,16 +374,23 @@ export function RegisterExercise() {
           <Controller
             control={control}
             name="group"
-            render={({field: {onChange}}) => (
+            render={({field: {value, onChange}}) => (
               <Select 
                 placeholder="Selecione um grupo"
                 accessibilityLabel="Selecione um grupo"
                 items={groupsFormatted}
                 onValueChange={onChange}
+                selectedValue={value}
                 errorMessage={errors.group?.message}
-            />
+                
+              />
             )}
           />
+          <TouchableOpacity onPress={() => setShowModal(true)}>
+            <Text color="green.500" fontWeight="bold" fontSize="md" mt={2} mb={4}>
+              Adicionar novo grupo
+            </Text>
+          </TouchableOpacity>
     
           <Button 
             title="Adicionar"
@@ -374,6 +400,29 @@ export function RegisterExercise() {
           />
         </Center>
       </ScrollView>
+
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+         <Modal.Content maxW="400px" bg="gray.600">
+         <Modal.CloseButton />
+         <Modal.Body>
+            <Input 
+              mt={10} 
+              placeholder="Nome do novo grupo"
+              onChangeText={setNewGroup}
+              value={newGroup}
+            />
+
+            <Button 
+              title="Criar"
+              mb={2}
+              variant="outline"
+              onPress={handleAddNewGroup}
+              disabled={newGroup.replace(/\s/g, '').length < 3}
+              isLoading={isRegistering}
+            />
+          </Modal.Body>
+         </Modal.Content>
+      </Modal>
     </VStack>
   )
 }

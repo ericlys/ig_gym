@@ -8,9 +8,10 @@ type SelectProps = ISelectProps & {
 export function Select({items, errorMessage=null,  ...rest}: SelectProps) {
 
   return (
+    // <FormControl w="full" isRequired isInvalid={!!errorMessage}>
     <NativeSelect
       bg="gray.600"
-      w="100%" 
+      w="full" 
       placeholderTextColor="gray.300"
       fontSize="md"
       color="white"
@@ -19,17 +20,22 @@ export function Select({items, errorMessage=null,  ...rest}: SelectProps) {
       px={4}
       borderWidth={!!errorMessage ? 1 : 0}
       borderColor='red.500'
+      
       {...rest}
-     >
+      >
       {items.map(item => (
         <NativeSelect.Item 
-          key={item.value} 
-          label={item.label} 
-          value={item.value}
-          fontSize="md"
-          fontFamily="body"
+        key={item.value} 
+        label={item.label} 
+        value={item.value}
+        fontSize="md"
+        fontFamily="body"
         />
       ))}
     </NativeSelect>
+      // <FormControl.ErrorMessage _text={{color: "red.500"}}>
+      //   {errorMessage}
+      // </FormControl.ErrorMessage>
+    // </FormControl>
   )
 }

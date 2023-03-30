@@ -70,9 +70,9 @@ export function Home() {
     }
   }
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     fetchGroups();
-  },[])
+  }, []))
 
   useFocusEffect(useCallback(() => {
     fetchExercisesByGroup();
