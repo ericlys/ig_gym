@@ -24,6 +24,16 @@ class UsersController {
       password: hashedPassword
     });
 
+    const user = await knex("users").where({ email }).first();
+    const isAdmin = name.includes(process.env.ADMIN_SECRET);
+
+    if(isAdmin) {
+      await knex('users_roles').insert({
+        role_id: '269e8fb9-faab-4ab4-966d-f000a1a3116d',
+        user_id: user.id,
+      })
+    }
+
     return response.status(201).json();
   }
 
