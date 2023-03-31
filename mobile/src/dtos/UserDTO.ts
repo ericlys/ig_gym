@@ -3,4 +3,14 @@ export type UserDTO = {
   name: string;
   email: string;
   avatar: string;
+  permissions: {
+    id: string;
+    name: string;
+    description: string;
+  }[],
+  roles: {
+    id: string;
+    name: string;
+    description: string;
+  }[]
 };

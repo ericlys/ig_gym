@@ -12,6 +12,7 @@ import { Exercise } from '@screens/Exercise';
 import { useTheme } from 'native-base';
 import { Platform } from 'react-native';
 import { RegisterExercise } from '@screens/RegisterExercise';
+import { useAuth } from '@hooks/useAuth';
 
 type AppRoutes = {
   home: undefined;
@@ -27,6 +28,12 @@ const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>();
 
 export function AppRoutes() {
   const { sizes, colors } = useTheme();
+
+  const { user } = useAuth();
+  
+  const checkIsExerciseCreator = 
+  user.permissions?.filter(permission => permission != null)
+  .some(permission => permission.name === 'create_exercise')
 
   const iconSize = sizes[6];
 
@@ -53,15 +60,18 @@ export function AppRoutes() {
           )
         }}
       />
-      <Screen 
-        name="newExercise" 
-        component={RegisterExercise}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <NewExerciseSvg fill={color} width={iconSize} height={iconSize}/>
-          )
-        }}
-      />
+      {
+        checkIsExerciseCreator &&
+        <Screen 
+          name="newExercise" 
+          component={RegisterExercise}
+          options={{
+            tabBarIcon: ({ color }) => (
+              <NewExerciseSvg fill={color} width={iconSize} height={iconSize}/>
+            )
+          }}
+        />
+      }
       <Screen 
         name="history" 
         component={History}

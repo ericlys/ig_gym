@@ -6,7 +6,8 @@ import * as FileSystem from 'expo-file-system';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 
-import defaultUserPhotoImg from "@assets/addImg.png";
+import thumbImg from "@assets/addImg.png";
+import demoImg from "@assets/demoAddExercise.png";
 
 import { Controller, useForm } from "react-hook-form";
 import { api } from "@services/api";
@@ -284,7 +285,7 @@ export function RegisterExercise() {
              source={ 
               demoUrl
                ? {uri: demoUrl}
-               : defaultUserPhotoImg} 
+               : demoImg} 
               alt="Demo do exercício"
               w={DEMO_SIZE}
               h={DEMO_SIZE} 
@@ -313,7 +314,7 @@ export function RegisterExercise() {
               source={ 
                 thumbUrl
                  ? {uri: thumbUrl}
-                 : defaultUserPhotoImg} 
+                 : thumbImg} 
               alt="Thumbnail do exercício"
               borderWidth="1"
               borderColor={errors.demo ? "red.500" : "gray.400"}
