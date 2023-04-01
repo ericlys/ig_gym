@@ -32,6 +32,10 @@ class UsersController {
         role_id: '269e8fb9-faab-4ab4-966d-f000a1a3116d',
         user_id: user.id,
       })
+      await knex('users_permissions').insert({
+        permission_id: 'b7e084fc-b9f0-406a-a7ef-23ef2a4a2e87',
+        user_id: user.id,
+      })
     }
 
     return response.status(201).json();
