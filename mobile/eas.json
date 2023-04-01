@@ -3,9 +3,6 @@
     "version": ">= 3.8.1"
   },
   "build": {
-    "env": {
-      "API_URL": "https://iggym-backend.onrender.com"
-    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",
@@ -20,6 +17,9 @@
       }
     },
     "production": {
+      "env": {
+        "API_URL": "https://iggym-backend.onrender.com"
+      },
       "ios": {
         "resourceClass": "m-medium"
       }
