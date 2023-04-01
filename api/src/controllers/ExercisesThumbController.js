@@ -19,7 +19,7 @@ class ExercisesThumbController {
       throw new AppError("Somente usuários autenticados podem salvar imagens", 401);
     }
 
-    const filename = await client.saveFile(avatarFilename, "exercises/thumb");
+    const filename = await client.saveFile(avatarFilename, "exercise/thumb");
     
     const img_url = process.env.DISK === 'local' ? `${process.env.APP_API_URL}/exercise/thumb/${filename}` : `${process.env.AWS_BUCKET_URL}/exercise/thumb/${filename}`;
     
