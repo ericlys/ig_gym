@@ -17,9 +17,6 @@
       }
     },
     "production": {
-      "env": {
-        "API_URL": "https://iggym-backend.onrender.com"
-      },
       "ios": {
         "resourceClass": "m-medium"
       }
