@@ -25,7 +25,7 @@ exercisesRoutes.post(
 
 exercisesRoutes.get("/bygroup/:group", exercisesController.index);
 exercisesRoutes.get("/:id", exercisesController.show);
-exercisesRoutes.post("/demo", ensureAuthenticated, upload.single("demo"), exercisesImageController.save);
-exercisesRoutes.post("/thumb", ensureAuthenticated, upload.single("thumb"), exercisesThumbController.save);
+exercisesRoutes.patch("/demo", ensureAuthenticated, upload.single("demo"), exercisesImageController.save);
+exercisesRoutes.patch("/thumb", ensureAuthenticated, upload.single("thumb"), exercisesThumbController.save);
 
 module.exports = exercisesRoutes;
