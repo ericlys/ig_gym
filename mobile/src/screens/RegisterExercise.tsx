@@ -119,10 +119,11 @@ export function RegisterExercise() {
         }
         
         const fileExtension = demoSelected.assets[0].uri.split('.').pop();
-        const filenameFormatted = demoSelected.assets[0].uri;
+        const parts = demoSelected.assets[0].uri.split('/');
+        const filename = parts[parts.length - 1].replace(/\s/g,'');
 
         const demoFile = {
-          name: filenameFormatted.toLowerCase().replace(/\s/g,''),
+          name: filename,
           uri: demoSelected.assets[0].uri,
           type: `${demoSelected.assets[0].type}/${fileExtension}`
         } as any;
@@ -178,10 +179,12 @@ export function RegisterExercise() {
         }
         
         const fileExtension = thumbSelected.assets[0].uri.split('.').pop();
-        const filenameFormatted = thumbSelected.assets[0].uri;
+
+        const parts = thumbSelected.assets[0].uri.split('/');
+        const filename = parts[parts.length - 1].replace(/\s/g,'');
 
         const thumbFile = {
-          name: filenameFormatted.toLowerCase().replace(/\s/g,''),
+          name: filename.toLowerCase().replace(/\s/g,''),
           uri: thumbSelected.assets[0].uri,
           type: `${thumbSelected.assets[0].type}/${fileExtension}`
         } as any;
