@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { FlatList, Heading, HStack, Text, useToast, VStack } from "native-base";
+import {
+  useQuery
+} from '@tanstack/react-query';
 
 import {AppNavigatorRoutesProps} from "@routes/app.routes";
 
@@ -11,50 +14,41 @@ import { AppError } from "@utils/AppError";
 import { api } from "@services/api";
 import { ExerciseDTO } from "@dtos/ExerciseDTO";
 import { Loading } from "@components/Loading";
+import { RefreshControl } from "react-native";
+import { queryClient } from "../lib/ReactQuery";
 
 export function Home() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [groups, setGroups] = useState<string[]>([])
-  const [exercises, setExercises] = useState<ExerciseDTO[]>([])
-  const [groupSelected, setGroupSelected] = useState("")
+  const [groupSelected, setGroupSelected] = useState("antebraço");
 
   const toast = useToast();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-
   function handleOpenExerciseDetails(exerciseId: string) {
     navigation.navigate("exercise", { exerciseId })
   }
-
-  async function fetchGroups() {
+      
+  const { data: groups, isLoading } = useQuery<string[]>(['groups'],
+  async () => {
     try {
-      setIsLoading(true);
       const response = await api.get('/groups');
-      setGroups(response.data);
       setGroupSelected(response.data[0]);
-
-    }catch (error) {
+      return response.data;
+    } catch (error) {
       const isAppError = error instanceof AppError;
       const title = isAppError ? error.message : 'Não foi possível carregar os grupos musculares.';
-
       toast.show({
         title,
         placement: 'top',
         bgColor: 'red.500'
       })
-    } finally {
-      setIsLoading(false);
+      return [];
     }
-  }
+  });
 
-  async function fetchExercisesByGroup() {
-    if(!groupSelected){
-      return
-    }
-    
+  const { data: exercises, isLoading: isLoadingExercise } = useQuery<ExerciseDTO[]>(['exerciseDTO', groupSelected], 
+  async () => {
     try {
-      setIsLoading(true);
       const response = await api.get(`/exercises/bygroup/${groupSelected}`);
-      setExercises(response.data);
+      return response.data;
 
     } catch (error) {
       const isAppError = error instanceof AppError;
@@ -65,19 +59,16 @@ export function Home() {
         placement: 'top',
         bgColor: 'red.500'
       })
-    } finally {
-      setIsLoading(false);
+
+      return [];
     }
-  }
+  });
 
-  useFocusEffect(useCallback(() => {
-    fetchGroups();
-  }, []))
-
-  useFocusEffect(useCallback(() => {
-    fetchExercisesByGroup();
-  }, [groupSelected]))
-
+  const onRefresh = useCallback(() => {
+    queryClient.invalidateQueries(['groups']);
+    queryClient.invalidateQueries(['exerciseDTO', groupSelected]);
+  }, []);
+  
   return(
     <VStack flex={1}>
       <HomeHeader/>
@@ -101,7 +92,7 @@ export function Home() {
       />
 
       {
-        isLoading ? <Loading/> :
+        isLoading || isLoadingExercise ? <Loading/> :
         <VStack flex={1} px={8}>
           <HStack justifyContent="space-between" mb={5}>
             <Heading color="gray.200" fontSize="md" fontFamily="heading">
@@ -109,7 +100,7 @@ export function Home() {
             </Heading>
 
             <Text color="gray.200" fontSize="sm">
-              {exercises.length}
+              {exercises?.length}
             </Text>
           </HStack>
 
@@ -121,6 +112,7 @@ export function Home() {
             )}
             showsVerticalScrollIndicator={false}
             _contentContainerStyle={{paddingBottom:20}}
+            refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh}/>}
           />
         </VStack>
       }
