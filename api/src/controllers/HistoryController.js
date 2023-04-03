@@ -1,6 +1,11 @@
 const AppError = require("../utils/AppError");
 const knex = require("../database");
 const dayjs = require("dayjs");
+const utc = require('dayjs/plugin/utc')
+const timezone = require('dayjs/plugin/timezone')
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 class HistoryController {
   async index(request, response) {
@@ -21,7 +26,7 @@ class HistoryController {
     const days = [];
 
     for (let exercise of history) {
-      const day = dayjs(exercise.created_at).format('DD.MM.YYYY');
+      const day = dayjs(exercise.created_at).tz('America/Sao_Paulo').format('DD.MM.YYYY');
 
       if (!days.includes(day)) {
         days.push(day);
