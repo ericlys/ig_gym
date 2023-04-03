@@ -14,6 +14,7 @@ import { api } from "@services/api";
 import { useEffect, useState } from "react";
 import { ExerciseDTO } from "@dtos/ExerciseDTO";
 import { Loading } from "@components/Loading";
+import { ExerciseHistory } from "@components/ExerciseHistory";
 
 type RouteParamsProps = {
   exerciseId: string;
@@ -152,6 +153,9 @@ export function Exercise() {
                 onPress={handleExerciseHistoryRegister}
               />
             </Box>
+
+            <ExerciseHistory />
+
           </ScrollView>
         </VStack>
       }
