@@ -117,7 +117,7 @@ export function Exercise() {
       { isLoading ?
         <Loading/> 
        :
-        <VStack p={8}>
+        <ScrollView p={8}>
           <Box rounded="lg" mb={3} overflow="hidden">
             <Image
               w="full"
@@ -129,7 +129,7 @@ export function Exercise() {
             />
           </Box>
 
-          <ScrollView>
+          <VStack>
             <Box bg="gray.600" rounded="md" pb={4} px={4}>
               <HStack alignItems="center" justifyContent="space-around" mb={6} mt={5}>
                 <HStack>
@@ -154,10 +154,10 @@ export function Exercise() {
               />
             </Box>
 
-            <ExerciseHistory />
+            <ExerciseHistory id={exerciseId} />
 
-          </ScrollView>
-        </VStack>
+          </VStack>
+        </ScrollView>
       }
     </VStack>
   )

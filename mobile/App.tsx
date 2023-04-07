@@ -11,6 +11,7 @@ import { Routes } from '@routes/index';
 import { AuthContextProvider } from '@contexts/AuthContext';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './src/lib/ReactQuery';
+import { ExerciseHistoricContextProvider } from '@contexts/ExerciseHistoric';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -27,7 +28,9 @@ export default function App() {
           translucent
           />
         <AuthContextProvider>
-          {fontsLoaded ? <Routes/> : <Loading/>}
+          <ExerciseHistoricContextProvider>
+            {fontsLoaded ? <Routes/> : <Loading/>}
+          </ExerciseHistoricContextProvider>
         </AuthContextProvider>
         </QueryClientProvider>
     </NativeBaseProvider>
