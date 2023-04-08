@@ -62,6 +62,20 @@ class HistoryController {
 
     return response.status(201).json();
   }
+
+  async delete(request, response) {
+    const { id } = request.query;
+
+    if (!id) {
+      throw new AppError("Histórico não encontrado.");
+    }
+
+    await knex("history")
+    .where('id', id)
+    .del();
+
+    return response.status(204).json();
+  }
 }
 
 module.exports = HistoryController;

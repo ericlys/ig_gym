@@ -11,5 +11,6 @@ historyRoutes.use(ensureAuthenticated);
 
 historyRoutes.get("/", historyController.index);
 historyRoutes.post("/", historyController.create);
+historyRoutes.delete("/", historyController.delete);
 
 module.exports = historyRoutes;
