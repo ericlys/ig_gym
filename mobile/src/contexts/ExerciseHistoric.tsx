@@ -1,3 +1,4 @@
+import { useAuth } from "@hooks/useAuth";
 import { ExerciseHistoric } from "@storage/exercise/ExerciseHistoric";
 import { exerciseHistoricAll } from "@storage/exercise/exerciseHistoricAll";
 import { exerciseHistoricCreate } from "@storage/exercise/exerciseHistoricCreate";
@@ -24,19 +25,21 @@ export const ExerciseHistoricContext = createContext({} as ExerciseHistoricDataP
 
 export function ExerciseHistoricContextProvider ({children}: ExerciseHistoricContextProviderProps) {
 
+  const { user } = useAuth();
+
   async function getExerciseHistoric(exerciseId: string) {
-    const exerciseHistoric = await exerciseHistoricAll(exerciseId)
+    const exerciseHistoric = await exerciseHistoricAll(exerciseId, user.id)
     const exerciseHistoricFormatted = groupExerciseHistoricListByDate(exerciseHistoric)
     return exerciseHistoricFormatted
   }
 
   async function registerExerciseHistoric(exerciseHistoric: ExerciseHistoric) {
-    await exerciseHistoricCreate(exerciseHistoric)
+    await exerciseHistoricCreate(exerciseHistoric, user.id)
   }
 
   async function deleteExerciseHistoric(id: string, exerciseId: string) {
     try {
-      await exerciseHistoricDelete(id, exerciseId);
+      await exerciseHistoricDelete(id, exerciseId, user.id);
     } catch (error) {
       console.log('err:', error)
     }
