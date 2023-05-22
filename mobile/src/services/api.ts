@@ -1,7 +1,8 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { AppError } from "@utils/AppError";
 import { storageAuthTokenGet, storageAuthTokenSave } from "@storage/storageAuthToken";
-const { API_URL } = process.env;
+import { API_URL } from "@env";
+
 
 type SignOut = () => void;
 

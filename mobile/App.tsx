@@ -12,8 +12,13 @@ import { AuthContextProvider } from '@contexts/AuthContext';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './src/lib/ReactQuery';
 import { ExerciseHistoricContextProvider } from '@contexts/ExerciseHistoric';
+import OneSignal from 'react-native-onesignal';
+import {ONESIGNAL_ID } from '@env';
 
 export default function App() {
+
+  OneSignal.setAppId(ONESIGNAL_ID!)
+
   const [fontsLoaded] = useFonts({
     Roboto_400Regular,
     Roboto_700Bold
