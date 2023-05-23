@@ -3,6 +3,7 @@ import { api } from "@services/api";
 import { storageAuthTokenGet, storageAuthTokenRemove, storageAuthTokenSave } from "@storage/storageAuthToken";
 import { storageUserGet, storageUserRemove, storageUserSave } from "@storage/storageUser";
 import { createContext, ReactNode, useEffect, useState } from "react";
+import { tagUserInfo } from "../notifications/notificationsTags";
 
 export type AuthContextDataProps = {
   user: UserDTO;
@@ -47,7 +48,7 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       const { data } = await api.post('/sessions', { email, password })
       
       if (data.user && data.token && data.refresh_token) {
-        await storageUserAndTokenSave(data.user, data.token, data.refresh_token);
+        await storageUserAndTokenSave(data.user, data.token, data.refresh_token);        
         userAndTokenUpdate(data.user, data.token);
       }
     } catch (error) {
@@ -109,6 +110,10 @@ export function AuthContextProvider({ children }: AuthContextProviderProps) {
       subscribe();
     }
   },[signOut]);
+
+  useEffect(() => {
+    tagUserInfo({userName: user.name, email: user.email})    
+  }, [user.name])
 
   return (
     <AuthContext.Provider value={{ 

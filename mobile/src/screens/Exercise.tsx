@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 import { ExerciseDTO } from "@dtos/ExerciseDTO";
 import { Loading } from "@components/Loading";
 import { ExerciseHistory } from "@components/ExerciseHistory";
+import { tagLastExerciseHistory } from "../notifications/notificationsTags";
 
 type RouteParamsProps = {
   exerciseId: string;
@@ -59,6 +60,8 @@ export function Exercise() {
       setSendingRegister(true);
 
       await api.post('/history', {exercise_id: exerciseId});
+
+      tagLastExerciseHistory(exercise.name)
 
       toast.show({
         title: 'Parabéns! Exercício registrado no seu histórico.',
