@@ -69,7 +69,7 @@ export function Exercise() {
         bgColor: 'green.700'
       });
 
-      navigation.navigate('history');
+      navigation.navigate('history', {upExercisesAmount: true});
 
     } catch (error) {
       const isAppError = error instanceof AppError;

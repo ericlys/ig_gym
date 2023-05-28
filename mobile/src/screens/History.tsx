@@ -1,6 +1,6 @@
 import { Heading, HStack, Modal, Pressable, SectionList, Text, useToast, VStack } from "native-base";
-import { useCallback, useState } from "react";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { api } from "@services/api";
 
 import { HistoryCard } from "@components/HistoryCard";
@@ -13,11 +13,19 @@ import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "../lib/ReactQuery";
 import { RefreshControl } from "react-native";
 import { Button } from "@components/Button";
+import { tagWeeklyExercisesAmount } from "@notifications/notificationsTags";
+
+type RouteParamsProps = {
+  upExercisesAmount?: boolean;
+}
 
 export function History() {
   const [showModal, setShowModal] = useState(false);
   const [deleteExerciseDayHistoryId, setDeleteExerciseDayHistoryId] = useState('');
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+
+  const route = useRoute();
+  const params = route.params as RouteParamsProps;
 
   function handleOpenExerciseDetails(exerciseId: string) {
     navigation.navigate("exercise", { exerciseId })
@@ -43,6 +51,18 @@ export function History() {
       return [];
     }
   })
+
+
+  useEffect( () => {
+    if(params?.upExercisesAmount && exercises) {
+     const amount = exercises.flatMap(day => {
+        const days =  day.data.filter(exercise => new Date(exercise.created_at).getMonth() === new Date().getMonth()) 
+        return days 
+      }).length
+
+      tagWeeklyExercisesAmount(amount)
+    }
+  }, [exercises, params])
 
   const onRefresh = useCallback(() => {
     queryClient.invalidateQueries(['history']);

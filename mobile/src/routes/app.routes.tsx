@@ -17,7 +17,9 @@ import { useAuth } from '@hooks/useAuth';
 type AppRoutes = {
   home: undefined;
   newExercise: undefined;
-  history: undefined;
+  history: {
+    upExercisesAmount: boolean
+  } | undefined;
   profile: undefined;
   exercise: { exerciseId: string };
 }

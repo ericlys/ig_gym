@@ -15,3 +15,7 @@ export function tagUserInfo({userName, email}: addTagsProps){
 export function tagLastExerciseHistoryTime() {
   OneSignal.sendTag('last_exercise', Math.floor(Date.now() / 1000).toString())
 }
+
+export function tagWeeklyExercisesAmount(amount: number) {
+  OneSignal.sendTag('w_ex_amount', amount.toString())
+}
