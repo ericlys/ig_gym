@@ -25,6 +25,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>ignitegym</string>
           <string>com.ericlys.ignitegym</string>
         </array>
       </dict>
