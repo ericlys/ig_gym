@@ -18,7 +18,8 @@ const linking = {
         parse: {
           exerciseId: (exerciseId: string) => exerciseId
         }
-      }
+      },
+      home: '*',
     }
   }
 }
